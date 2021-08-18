@@ -14,7 +14,7 @@ python dataprep.py
 ```
 
 ## Training
-Training from pretrained with augmentation for 500 epochs.
+Training from scratch
 ```
 python main.py
 ```
