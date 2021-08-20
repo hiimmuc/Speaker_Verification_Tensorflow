@@ -20,7 +20,8 @@ class Trainer:
     def __init__(self, args, train_dts, dev_dts, test_dts):
         self.args = args
         self.save_dir = self.args.save_dir
-        self.ckpt_path = os.path.join(self.save_dir, 'weights_best.hdf5')
+        self.ckpt_path = os.path.join(
+            self.save_dir, '{}_weights_best.hdf5'.format(self.args.model))
         self.train_dts = train_dts
         self.dev_dts = dev_dts
         self.test_dts = test_dts
@@ -63,7 +64,8 @@ class Trainer:
                                      epochs=num_epochs,
                                      callbacks=[checkpoint, es_callback, reduce_lr])
 
-        self.model.save(os.path.join(self.save_dir, 'last_epoch.h5'))
+        self.model.save(os.path.join(
+            self.save_dir, '{}_last_epoch.h5'.format(self.args.model)))
 
         self.history = history
 
