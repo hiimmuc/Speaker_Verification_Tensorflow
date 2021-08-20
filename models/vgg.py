@@ -90,7 +90,7 @@ class VGG(object):
         return model
 
 
-def construct_net(args, input_shape, num_classes):
+def construct_net(args, input_shape, num_classes, **kwargs):
     my_model = VGG(input_shape, num_classes)
     if args.model == 'vgg16':
         return my_model.build_model_vgg16(summary=False)

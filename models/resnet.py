@@ -210,7 +210,7 @@ def resnet_152():
     return ResNetTypeII(layer_params=[3, 8, 36, 3])
 
 
-def construct_net(args, input_shape):
+def construct_net(args, input_shape, num_classes, **kwargs):
     if args.model == 'resnet18':
         return resnet_18().build(input_shape)
     elif args.model == 'resnet34':
