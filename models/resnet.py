@@ -1,5 +1,5 @@
 import tensorflow as tf
-from MFCCs_config import NUM_CLASSES
+from tensorflow.keras.layers import Input, MaxPooling2D
 
 
 # Residual block
@@ -104,9 +104,9 @@ def make_bottleneck_layer(filter_num, blocks, stride=1):
 
 # Model define
 class ResNetTypeI(tf.keras.Model):
-    def __init__(self, layer_params):
+    def __init__(self, layer_params, input_shape, num_classes):
         super(ResNetTypeI, self).__init__()
-
+        self.input_layer = tf.keras.layers.Input(shape=input_shape)
         self.conv1 = tf.keras.layers.Conv2D(filters=64,
                                             kernel_size=(7, 7),
                                             strides=2,
@@ -130,26 +130,28 @@ class ResNetTypeI(tf.keras.Model):
 
         self.avgpool = tf.keras.layers.GlobalAveragePooling2D()
         self.fc = tf.keras.layers.Dense(
-            units=NUM_CLASSES, activation=tf.keras.activations.softmax)
+            units=num_classes, activation=tf.keras.activations.softmax)
 
-    def call(self, inputs, training=None, mask=None):
-        x = self.conv1(inputs)
-        x = self.bn1(x, training=training)
+    def build_model(self):
+        x = self.conv1(self.input_layer)
+        x = self.bn1(x)
         x = tf.nn.relu(x)
         x = self.pool1(x)
-        x = self.layer1(x, training=training)
-        x = self.layer2(x, training=training)
-        x = self.layer3(x, training=training)
-        x = self.layer4(x, training=training)
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
         x = self.avgpool(x)
         output = self.fc(x)
 
-        return output
+        net = tf.keras.Model(self.input_layer, output)
+        return net
 
 
 class ResNetTypeII(tf.keras.Model):
-    def __init__(self, layer_params):
+    def __init__(self, layer_params, input_shape, num_classes):
         super(ResNetTypeII, self).__init__()
+        self.input_layer = tf.keras.layers.Input(shape=input_shape)
         self.conv1 = tf.keras.layers.Conv2D(filters=64,
                                             kernel_size=(7, 7),
                                             strides=2,
@@ -173,53 +175,54 @@ class ResNetTypeII(tf.keras.Model):
 
         self.avgpool = tf.keras.layers.GlobalAveragePooling2D()
         self.fc = tf.keras.layers.Dense(
-            units=NUM_CLASSES, activation=tf.keras.activations.softmax)
+            units=num_classes, activation=tf.keras.activations.softmax)
 
-    def call(self, inputs, training=None, mask=None):
-        x = self.conv1(inputs)
-        x = self.bn1(x, training=training)
+    def build_model(self):
+        x = self.conv1(self.input_layer)
+        x = self.bn1(x)
         x = tf.nn.relu(x)
         x = self.pool1(x)
-        x = self.layer1(x, training=training)
-        x = self.layer2(x, training=training)
-        x = self.layer3(x, training=training)
-        x = self.layer4(x, training=training)
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
         x = self.avgpool(x)
         output = self.fc(x)
 
-        return output
+        net = tf.keras.Model(self.input_layer, output)
+        return net
 
 
-def resnet_18():
-    return ResNetTypeI(layer_params=[2, 2, 2, 2])
+def resnet_18(input_shape, num_classes):
+    return ResNetTypeI(layer_params=[2, 2, 2, 2], input_shape=input_shape, num_classes=num_classes).build_model()
 
 
-def resnet_34():
-    return ResNetTypeI(layer_params=[3, 4, 6, 3])
+def resnet_34(input_shape, num_classes):
+    return ResNetTypeI(layer_params=[3, 4, 6, 3], input_shape=input_shape, num_classes=num_classes).build_model()
 
 
-def resnet_50():
-    return ResNetTypeII(layer_params=[3, 4, 6, 3])
+def resnet_50(input_shape, num_classes):
+    return ResNetTypeII(layer_params=[3, 4, 6, 3], input_shape=input_shape, num_classes=num_classes).build_model()
 
 
-def resnet_101():
-    return ResNetTypeII(layer_params=[3, 4, 23, 3])
+def resnet_101(input_shape, num_classes):
+    return ResNetTypeII(layer_params=[3, 4, 23, 3], input_shape=input_shape, num_classes=num_classes).build_model()
 
 
-def resnet_152():
-    return ResNetTypeII(layer_params=[3, 8, 36, 3])
+def resnet_152(input_shape, num_classes):
+    return ResNetTypeII(layer_params=[3, 8, 36, 3], input_shape=input_shape, num_classes=num_classes).build_model()
 
 
 def construct_net(args, input_shape, num_classes, **kwargs):
     if args.model == 'resnet18':
-        return resnet_18().build(input_shape)
+        return resnet_18(input_shape, num_classes)
     elif args.model == 'resnet34':
-        return resnet_34().build(input_shape)
+        return resnet_34(input_shape, num_classes)
     elif args.model == 'resnet50':
-        return resnet_50().build(input_shape)
+        return resnet_50(input_shape, num_classes)
     elif args.model == 'resnet101':
-        return resnet_101().build(input_shape)
+        return resnet_101(input_shape, num_classes)
     elif args.model == 'resnet152':
-        return resnet_152().build(input_shape)
+        return resnet_152(input_shape, num_classes)
     else:
         raise 'wrong model name'
