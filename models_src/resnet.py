@@ -23,9 +23,9 @@ Reference:
 import tensorflow as tf
 from tensorflow.keras import backend
 from tensorflow.keras.applications import imagenet_utils
-from tensorflow.keras.layers import VersionAwareLayers
 from tensorflow.keras.utils import data_utils, layer_utils
 from tensorflow.python.keras.engine import training
+from tensorflow.python.keras.layers import VersionAwareLayers
 from tensorflow.python.util.tf_export import keras_export
 
 BASE_WEIGHTS_PATH = (
@@ -438,9 +438,44 @@ def stack3(x, filters, blocks, stride1=2, groups=32, name=None):
     return x
 
 
-@keras_export('keras.applications.resnet50.ResNet50',
-              'keras.applications.resnet.ResNet50',
-              'keras.applications.ResNet50')
+def ResNet18(include_top=True,
+             weights=None,
+             input_tensor=None,
+             input_shape=None,
+             pooling=None,
+             classes=1000,
+             **kwargs):
+    """Instantiates the ResNet50 architecture."""
+
+    def stack_fn(x):
+        x = stack1(x, 64, 2, stride1=1, name='conv2')
+        x = stack1(x, 128, 2, name='conv3')
+        x = stack1(x, 256, 2, name='conv4')
+        return stack1(x, 512, 2, name='conv5')
+
+    return ResNet(stack_fn, False, True, 'resnet18', include_top, weights,
+                  input_tensor, input_shape, pooling, classes, **kwargs)
+
+
+def ResNet34(include_top=True,
+             weights=None,
+             input_tensor=None,
+             input_shape=None,
+             pooling=None,
+             classes=1000,
+             **kwargs):
+    """Instantiates the ResNet50 architecture."""
+
+    def stack_fn(x):
+        x = stack2(x, 64, 3, stride1=1, name='conv2')
+        x = stack2(x, 128, 4, name='conv3')
+        x = stack2(x, 256, 6, name='conv4')
+        return stack2(x, 512, 3, name='conv5')
+
+    return ResNet(stack_fn, False, True, 'resnet34', include_top, weights,
+                  input_tensor, input_shape, pooling, classes, **kwargs)
+
+
 def ResNet50(include_top=True,
              weights='imagenet',
              input_tensor=None,
@@ -460,8 +495,6 @@ def ResNet50(include_top=True,
                   input_tensor, input_shape, pooling, classes, **kwargs)
 
 
-@keras_export('keras.applications.resnet.ResNet101',
-              'keras.applications.ResNet101')
 def ResNet101(include_top=True,
               weights='imagenet',
               input_tensor=None,
@@ -481,8 +514,6 @@ def ResNet101(include_top=True,
                   input_tensor, input_shape, pooling, classes, **kwargs)
 
 
-@keras_export('keras.applications.resnet.ResNet152',
-              'keras.applications.ResNet152')
 def ResNet152(include_top=True,
               weights='imagenet',
               input_tensor=None,
@@ -502,15 +533,11 @@ def ResNet152(include_top=True,
                   input_tensor, input_shape, pooling, classes, **kwargs)
 
 
-@keras_export('keras.applications.resnet50.preprocess_input',
-              'keras.applications.resnet.preprocess_input')
 def preprocess_input(x, data_format=None):
     return imagenet_utils.preprocess_input(
         x, data_format=data_format, mode='caffe')
 
 
-@keras_export('keras.applications.resnet50.decode_predictions',
-              'keras.applications.resnet.decode_predictions')
 def decode_predictions(preds, top=5):
     return imagenet_utils.decode_predictions(preds, top=top)
 
@@ -584,3 +611,18 @@ DOC = """
 setattr(ResNet50, '__doc__', ResNet50.__doc__ + DOC)
 setattr(ResNet101, '__doc__', ResNet101.__doc__ + DOC)
 setattr(ResNet152, '__doc__', ResNet152.__doc__ + DOC)
+
+
+def construct_net(args, input_shape, num_classes, **kwargs):
+    if args.model == 'resnet18':
+        return ResNet18(input_shape=input_shape, classes=num_classes, **kwargs)
+    elif args.model == 'resnet34':
+        return ResNet34(input_shape=input_shape, classes=num_classes, **kwargs)
+    elif args.model == 'resnet50':
+        return ResNet50(input_shape=input_shape, classes=num_classes, **kwargs)
+    elif args.model == 'resnet101':
+        return ResNet101(input_shape=input_shape, classes=num_classes, **kwargs)
+    elif args.model == 'resnet152':
+        return ResNet152(input_shape=input_shape, classes=num_classes, **kwargs)
+    else:
+        raise 'wrong model name'
