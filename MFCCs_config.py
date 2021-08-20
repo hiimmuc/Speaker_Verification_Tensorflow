@@ -5,3 +5,4 @@ class mfcc_config:
     n_fft = 1024
     hop_length = 512
     n_mels = 256
+    num_classes = 400
