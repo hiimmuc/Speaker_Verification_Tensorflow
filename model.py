@@ -1,21 +1,43 @@
-from models import vgg, resnet
-from tensorflow.keras import optimizers
-from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
+import importlib
+
 import numpy as np
+from tensorflow.keras import optimizers
 
-MODELS = {'vgg-m': vgg.VGG, 'vgg16': vgg.VGG, 'custom': vgg.VGG}
+from models import *
 
 
-def define_model(args, input_shape, num_classes, summary=False):
-    # TODO: need multi selections of model
-    model = MODELS[args.backbone.lower()](input_shape, num_classes).build_model_vgg_m(summary)
+def get_net(args, **kwargs):
+    if 'resnet' in args.model:
+        model_name = 'resnet'
+    elif 'vgg' in args.model:
+        model_name = 'vgg'
+    else:
+        raise ValueError('Unknown model name')
+    net = importlib.import_module('models.{}'.format(
+        model_name)).__getattribute__('construct_net')
+    return net
+
+
+def define_model(args, input_shape, num_classes, summary=True):
     learning_rate = args.learning_rate
     if args.optimizer == 'SGD':
         momentum = args.momentum
         nesterov = args.nesterov
-        opt = optimizers.SGD(learning_rate=learning_rate, momentum=momentum, nesterov=nesterov)
+        opt = optimizers.SGD(learning_rate=learning_rate,
+                             momentum=momentum, nesterov=nesterov)
     elif args.optimizer == 'Adam':
         epsilon = args.adam_epsilon
-        opt =optimizers.Adam(learning_rate=learning_rate, epsilon=epsilon)
-    model.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer=opt)
+        opt = optimizers.Adam(learning_rate=learning_rate, epsilon=epsilon)
+    net = get_net(args)
+    model = net(args, input_shape, num_classes)
+    if summary:
+        model.summary()
+
+    model.compile(loss='categorical_crossentropy',
+                  metrics=['accuracy'], optimizer=opt)
+
     return model
+
+
+if __name__ == '__main__':
+    pass
