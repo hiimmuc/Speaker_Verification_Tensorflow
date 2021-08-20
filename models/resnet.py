@@ -1,5 +1,5 @@
 import tensorflow as tf
-from MFCCs_config import num_classes as NUM_CLASSES
+from MFCCs_config import NUM_CLASSES
 
 
 # Residual block
