@@ -20,7 +20,7 @@ class Trainer:
     def __init__(self, args, train_dts, dev_dts, test_dts):
         self.args = args
         self.save_dir = self.args.save_dir
-        self.ckpt_path = os.path.join(self.save_dir, 'weights.best.hdf5')
+        self.ckpt_path = os.path.join(self.save_dir, 'weights_best.hdf5')
         self.train_dts = train_dts
         self.dev_dts = dev_dts
         self.test_dts = test_dts
@@ -31,8 +31,7 @@ class Trainer:
 
     def train(self, val_on_train=True):
         checkpoint_path = self.ckpt_path
-        train_new = not self.args.use_pretrained
-        if not train_new:
+        if self.args.use_pretrained:
             if os.path.exists(checkpoint_path):
                 self.model.load_weights(checkpoint_path)
 
@@ -62,11 +61,8 @@ class Trainer:
                                      epochs=num_epochs,
                                      callbacks=[checkpoint, es_callback, reduce_lr])
 
-        # with open(os.path.join(self.save_dir, '/trainHistoryDict'), 'wb') as file_pi:
-            # pickle.dump(history.history, file_pi)
         self.model.save(os.path.join(self.save_dir, 'last_epoch.h5'))
-        # np.save(os.path.join(self.save_dir, '/trainHistoryDict'), history.history)
-        # json.dump(history.history, open(os.path.join(self.save_dir, 'trainHistory'), 'w'))
+
         self.history = history
 
     def evaluate(self):
