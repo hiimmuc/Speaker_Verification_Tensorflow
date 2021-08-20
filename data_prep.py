@@ -1,12 +1,14 @@
 import glob
 import os
 import shutil
+
 import librosa
 import librosa.display
-from tqdm.auto import tqdm
 import numpy as np
-import MFCCs_config as cfg
 from tensorflow.keras.utils import to_categorical
+from tqdm.auto import tqdm
+
+import MFCCs_config as cfg
 
 
 def get_audio_path(folder):
@@ -22,7 +24,8 @@ class MetadataCreate(object):
         self.filenames = os.listdir(self.raw_path)
         self.check_invalid_folder()
         self.filenames.sort(key=lambda x: int(list(x.split('-'))[0]))
-        ratio = [.8 * len(self.filenames), .9 * .8 * len(self.filenames), len(self.filenames)]
+        ratio = [.8 * len(self.filenames), .9 * .8 *
+                 len(self.filenames), len(self.filenames)]
         ratio = list(map(int, ratio))
         self.train_path = self.filenames[0:ratio[0]]
         self.val_path = self.filenames[ratio[0]:ratio[1]]
@@ -62,7 +65,7 @@ class MetadataCreate(object):
 
 # create feature vectors directory
 class FeatureExtraction:
-    def __init__(self, model_path, save_path):
+    def __init__(self, model_path='./backup/model', save_path='./dataset/feature_vectors'):
         self.config = cfg.mfcc_config
         self.data_files = []
         self.speakers = self.get_labels()
@@ -72,7 +75,8 @@ class FeatureExtraction:
     def get_labels(self, data_path='./dataset'):
         with open(os.path.join(data_path, 'data.txt'), 'r') as f:
             self.data_files = f.readlines()
-        self.data_files = list(map(lambda x: x.replace('\n', ''), self.data_files))
+        self.data_files = list(
+            map(lambda x: x.replace('\n', ''), self.data_files))
         # get label of audio
         candidates = []
         for f in self.data_files:
@@ -86,7 +90,8 @@ class FeatureExtraction:
             """
                 Load and preprocess the audio
             """
-            audio, sample_rate = librosa.load(audio_path, sr=self.config.sampling_rate)
+            audio, sample_rate = librosa.load(
+                audio_path, sr=self.config.sampling_rate)
             y = audio
             """
                 Convert to MFCC numpy array
@@ -100,7 +105,8 @@ class FeatureExtraction:
                                          n_mels=n_mels)
             pad_width = max_pad_length - mfccs.shape[1]
             pad_width = pad_width if pad_width >= 0 else 0
-            mfccs = np.pad(mfccs[:, :max_pad_length], pad_width=((0, 0), (0, pad_width)), mode='constant')
+            mfccs = np.pad(mfccs[:, :max_pad_length], pad_width=(
+                (0, 0), (0, pad_width)), mode='constant')
             # print(mfccs.shape)
         except Exception as e:
             print("Error encountered while parsing file: ", e)
@@ -117,9 +123,11 @@ class FeatureExtraction:
         features = []
         labels = []
         for i, folder in enumerate(self.data_files):
-            audio_files = get_audio_path(folder=folder)  # same speaker -> same label
+            # same speaker -> same label
+            audio_files = get_audio_path(folder=folder)
             label = self.speakers[i]
-            print(f"\n{i}th speaker, id {label}, is processing, total {len(audio_files)} files")
+            print(
+                f"\n{i}th speaker, id {label}, is processing, total {len(audio_files)} files")
             for j, audio_path in tqdm(enumerate(audio_files)):
                 data, sr = self.extract_feature_frame(audio_path=audio_path)
                 if data is not None:
@@ -138,8 +146,10 @@ class FeatureExtraction:
         return X, Y, y_l
 
     def save_as_ndarray(self, X, y, y_encode):
-        os.makedirs(self.model_path, exist_ok=True)   # make folder to save train file
-        os.makedirs(self.save_path, exist_ok=True)    # make folder to save test file
+        # make folder to save train file
+        os.makedirs(self.model_path, exist_ok=True)
+        # make folder to save test file
+        os.makedirs(self.save_path, exist_ok=True)
         np.save(os.path.join(self.save_path, "data.npy"), X)
         np.save(os.path.join(self.save_path, "label_encode.npy"), y_encode)
         np.save(os.path.join(self.save_path, "label.npy"), y)

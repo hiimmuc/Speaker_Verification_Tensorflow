@@ -2,6 +2,7 @@ import logging
 import os
 
 import numpy as np
+import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from tqdm import tqdm
 
@@ -30,3 +31,14 @@ def load_dataset(args, mode):
         return None
     else:
         raise 'Wrong dataset type'
+
+
+def load_model_no_top(model_path, summary=True):
+    cnn_test = tf.keras.models.load_model(model_path)
+    cnn_test.pop()
+    if summary:
+        cnn_test.summary()
+    new_model = tf.keras.models.Model(
+        inputs=cnn_test.input, outputs=cnn_test.layers[-1].output)
+    new_model.compile(optimizer='adam', loss='categorical_crossentropy')
+    return new_model

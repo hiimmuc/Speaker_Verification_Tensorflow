@@ -64,7 +64,7 @@ class Trainer:
 
         # with open(os.path.join(self.save_dir, '/trainHistoryDict'), 'wb') as file_pi:
             # pickle.dump(history.history, file_pi)
-        self.model.save(os.path.join(self.save_dir, 'last_train.h5'))
+        self.model.save(os.path.join(self.save_dir, 'last_epoch.h5'))
         # np.save(os.path.join(self.save_dir, '/trainHistoryDict'), history.history)
         # json.dump(history.history, open(os.path.join(self.save_dir, 'trainHistory'), 'w'))
         self.history = history
