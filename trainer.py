@@ -41,14 +41,14 @@ class Trainer:
         print("Pre-training accuracy: %.4f%%" % accuracy)
         # Train the model
         num_epochs = self.args.epochs
-        num_batch_size = 10
+        num_batch_size = self.args.train_batch_size
         #  set callback
         checkpoint = ModelCheckpoint(
             filepath=checkpoint_path, monitor='val_loss', verbose=1, save_best_only=True)
         es_callback = EarlyStopping(
-            monitor='val_loss', patience=10, mode='min', verbose=1)
+            monitor='val_loss', patience=int(0.2*num_epochs), mode='min', verbose=1)
         reduce_lr = ReduceLROnPlateau(
-            monitor='val_loss', factor=0.5, patience=5, verbose=0, mode='min', min_lr=0)
+            monitor='val_loss', factor=0.9, patience=int(0.1*num_epochs), verbose=0, mode='min', min_lr=0)
 
         if val_on_train:
             history = self.model.fit(self.x_train, self.y_train, batch_size=num_batch_size, epochs=num_epochs,
@@ -67,9 +67,11 @@ class Trainer:
 
     def evaluate(self):
         # Evaluating the model on the training and testing set
-        score = self.model.evaluate(self.x_train, self.y_train, verbose=0)
+        score = self.model.evaluate(
+            self.x_train, self.y_train, batch_size=self.args.test_batch_size, verbose=0)
         print("Training Accuracy: ", score[1])
-        score = self.model.evaluate(self.x_val, self.y_val, verbose=0)
+        score = self.model.evaluate(
+            self.x_val, self.y_val, batch_size=self.args.test_batch_size, verbose=0)
         print("Validation Accuracy: ", score[1])
 
     def load_model(self):
