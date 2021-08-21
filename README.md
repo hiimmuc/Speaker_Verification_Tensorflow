@@ -1,6 +1,7 @@
 # SpeakerVerificaiton
 Speaker verification with zalo ai challenge dataset
 ## Dependencies
+python version: 3.8.11
 ```
 pip install -r requirements.txt
 ```
