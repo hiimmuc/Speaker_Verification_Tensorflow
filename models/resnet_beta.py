@@ -371,24 +371,25 @@ def stack_residual_block3(x, filters, blocks, stride1=2, groups=32, name=None):
     return x
 
 
-def basic_block(x, filters, kernel_size=3, strides=1, conv_shortcut=True, name=None):
+def basic_block(x, filters,
+                kernel_size=3,
+                strides=1,
+                conv_shortcut=False,
+                name=None):
     """Basic 3 X 3 convolution blocks.
-
+    3x3 conv -> batch norm -> ReLU -> 3x3 conv -> batch norm -> ReLU
     Returns:
       Output tensor for the stacked blocks.
     """
     bn_axis = 3 if backend.image_data_format() == 'channels_last' else 1
 
-    preact = layers.BatchNormalization(
-        axis=bn_axis, epsilon=1.001e-5, name=name + '_preact_bn')(x)
-    preact = layers.Activation('relu', name=name + '_preact_relu')(preact)
-
     if conv_shortcut:
         shortcut = layers.Conv2D(
-            4 * filters, 1, strides=strides, name=name + '_0_conv')(preact)
+            4 * filters, 1, strides=strides, name=name + '_0_conv')(x)
+        shortcut = layers.BatchNormalization(
+            axis=bn_axis, epsilon=1.001e-5, name=name + '_0_bn')(shortcut)
     else:
-        shortcut = layers.MaxPooling2D(
-            1, strides=strides)(x) if strides > 1 else x
+        shortcut = x
 
     x = layers.Conv2D(filters=filters,
                       kernel_size=kernel_size,
@@ -398,15 +399,14 @@ def basic_block(x, filters, kernel_size=3, strides=1, conv_shortcut=True, name=N
         axis=bn_axis, epsilon=1.001e-5, name=name + '_1_bn')(x)
     x = layers.Activation('relu', name=name + '_1_relu')(x)
 
-    x = layers.Conv2D(filters=filters,
+    x = layers.Conv2D(filters=4 * filters,
                       kernel_size=kernel_size,
-                      strides=strides, padding='same',
+                      strides=(1, 1), padding='same',
                       use_bias=False, name=name + '_2_conv')(x)
     x = layers.BatchNormalization(
         axis=bn_axis, epsilon=1.001e-5, name=name + '_2_bn')(x)
     x = layers.Activation('relu', name=name + '_2_relu')(x)
 
-    x = layers.Conv2D(4 * filters, 1, name=name + '_3_conv')(x)
     x = layers.Add(name=name + '_out')([shortcut, x])
     return x
 
@@ -417,18 +417,18 @@ def stack_basic_block(x, filters, blocks, stride1=2, name=None):
     Args:
       x: input tensor.
       filters: integer, filters of the bottleneck layer in a block.
-      blocks: integer, blocks in the stacked blocks.
+      blocks: integer, numbers of blocks in the stacked blocks.
       stride1: default 2, stride of the first layer in the first block.
-      groups: default 32, group size for grouped convolution.
       name: string, stack label.
 
     Returns:
       Output tensor for the stacked blocks.
     """
-    x = basic_block(x, filters, strides=stride1, name=name + '_block1')
+    x = basic_block(x, filters, conv_shortcut=True,
+                    strides=stride1, name=name + '_block1')
     for i in range(2, blocks + 1):
-        x = basic_block(x, filters, conv_shortcut=False,
-                        name=name + '_block' + str(i))
+        x = basic_block(x, filters, name=name + '_block' + str(i))
+
     return x
 
 
@@ -437,15 +437,15 @@ def ResNet18(include_top=True,
              input_tensor=None,
              input_shape=None,
              pooling=None,
-             classes=400, **kwargs):
+             classes=NUM_CLASSES, **kwargs):
     """Instantiates the ResNet18 architecture."""
 
     def stack_fn(x):
         x = stack_basic_block(x, 64, 2, stride1=1, name='conv2')
         x = stack_basic_block(x, 128, 2, name='conv3')
         x = stack_basic_block(x, 256, 2, name='conv4')
-        x = stack_basic_block(x, 512, 2, name='conv5')
-        return x
+        return stack_basic_block(x, 512, 2, name='conv5')
+
     return ResNet(stack_fn=stack_fn,
                   preact=False,
                   use_bias=True,
@@ -471,8 +471,7 @@ def ResNet34(include_top=True,
         x = stack_basic_block(x, 64, 3, stride1=1, name='conv2')
         x = stack_basic_block(x, 128, 4, name='conv3')
         x = stack_basic_block(x, 256, 6, name='conv4')
-        x = stack_basic_block(x, 512, 3, name='conv5')
-        return x
+        return stack_basic_block(x, 512, 3, name='conv5')
 
     return ResNet(stack_fn=stack_fn,
                   preact=False,

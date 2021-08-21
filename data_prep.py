@@ -158,9 +158,9 @@ class FeatureExtraction:
 if __name__ == '__main__':
     model_path = './backup/model'
     save_path = './dataset/feature_vectors'
-    # metadata_gen = MetadataCreate('dataset/raw_dataset', 'dataset')
-    # metadata_gen.export_metadata()
-    # data_gen = FeatureExtraction(model_path, save_path)
-    # x, y, y_l = data_gen.process_raw_dataset()
-    # data_gen.save_as_ndarray(x, y_l, y)
+    metadata_gen = MetadataCreate('dataset/raw_dataset', 'dataset')
+    metadata_gen.export_metadata()
+    data_gen = FeatureExtraction(model_path, save_path)
+    x, y, y_l = data_gen.process_raw_dataset()
+    data_gen.save_as_ndarray(x, y_l, y)
     pass

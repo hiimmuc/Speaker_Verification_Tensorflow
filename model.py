@@ -2,6 +2,7 @@ import importlib
 
 import numpy as np
 from tensorflow.keras.optimizers import SGD, Adam
+from tensorflow.keras.utils import plot_model
 
 from models import *
 
@@ -18,7 +19,7 @@ def get_net(args, **kwargs):
     return net
 
 
-def define_model(args, input_shape, num_classes, summary=True):
+def define_model(args, input_shape, num_classes, plot_model_graph=True, summary=True):
     learning_rate = args.learning_rate
     if args.optimizer == 'SGD':
         momentum = args.momentum
@@ -28,12 +29,16 @@ def define_model(args, input_shape, num_classes, summary=True):
     elif args.optimizer == 'Adam':
         epsilon = args.adam_epsilon
         opt = Adam(learning_rate=learning_rate, epsilon=epsilon)
-        
+
     net = get_net(args)
     model = net(args, input_shape, num_classes)
-    
+
     if summary:
         model.summary()
+    if plot_model_graph:
+        save_img = args.save_dir + '/' + args.model + '_model.png'
+        plot_model(model, to_file=save_img,
+                   show_shapes=True, show_layer_names=True)
 
     model.compile(loss='categorical_crossentropy',
                   metrics=['accuracy'], optimizer=opt)
