@@ -60,10 +60,10 @@ if __name__ == '__main__':
                         type=str, help="The input data dir")
     parser.add_argument("--save_dir", default="./backup", type=str,
                         help="saved directory for weight, logging files")
-    parser.add_argument("--use_pretrained", default=False, type=bool,
+    parser.add_argument("--use_pretrained", default=False, action='store_true',
                         help="decide wether train from scratch or saved checkpoints")
     #
-    parser.add_argument("--report", default=False, type=bool,
+    parser.add_argument("--report", default=False, action='store_true',
                         help="make report of parameters")
 
     args = parser.parse_args()
