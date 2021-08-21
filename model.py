@@ -54,8 +54,8 @@ def define_model(args, input_shape, num_classes, plot_model_graph=True, summary=
         plot_model(model, to_file=save_img,
                    show_shapes=True, show_layer_names=True)
     # complile model
-    model.compile(optimizer=opt, loss=loss_function, metrics=[
-                  train_loss, train_accuracy, val_loss, val_accuracy])
+    model.compile(optimizer=opt, loss=loss_function,
+                  metrics=[train_loss, train_accuracy])
 
     return model
 
