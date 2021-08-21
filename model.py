@@ -42,6 +42,7 @@ def define_model(args, input_shape, num_classes, plot_model_graph=True, summary=
     val_loss = tf.keras.metrics.Mean(name='val_loss')
     val_accuracy = tf.keras.metrics.CategoricalAccuracy(name='val_accuracy')
 
+    metric_accuracy = tf.keras.metrics.Accuracy(name='accuracy')
     # get network
 
     net = get_net(args)
@@ -54,8 +55,7 @@ def define_model(args, input_shape, num_classes, plot_model_graph=True, summary=
         plot_model(model, to_file=save_img,
                    show_shapes=True, show_layer_names=True)
     # complile model
-    model.compile(optimizer=opt, loss=loss_function,
-                  metrics=[train_loss, train_accuracy])
+    model.compile(optimizer=opt, loss=loss_function, metrics=[metric_accuracy])
 
     return model
 
