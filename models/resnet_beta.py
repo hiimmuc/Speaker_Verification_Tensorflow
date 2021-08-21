@@ -557,7 +557,7 @@ def ResNet152(include_top=True,
     return ResNet(stack_fn=stack_fn,
                   preact=False,
                   use_bias=True,
-                  model_name='resnet52',
+                  model_name='resnet152',
                   include_top=include_top,
                   weights=weights,
                   input_tensor=input_tensor,
@@ -573,7 +573,7 @@ def ResNet50V2(
         input_shape=None,
         pooling=None,
         classes=NUM_CLASSES,
-        classifier_activation='softmax'):
+        **kwargs):
     """Instantiates the ResNet50V2 architecture."""
     def stack_fn(x):
         x = stack_residual_block2(x, 64, 3, name='conv2')
@@ -581,18 +581,16 @@ def ResNet50V2(
         x = stack_residual_block2(x, 256, 6, name='conv4')
         return stack_residual_block2(x, 512, 3, stride1=1, name='conv5')
 
-    return ResNet(
-        stack_fn,
-        True,
-        True,
-        'resnet50v2',
-        include_top,
-        weights,
-        input_tensor,
-        input_shape,
-        pooling,
-        classes,
-        classifier_activation=classifier_activation)
+    return ResNet(stack_fn=stack_fn,
+                  preact=True,
+                  use_bias=True,
+                  model_name='resnet50v2',
+                  include_top=include_top,
+                  weights=weights,
+                  input_tensor=input_tensor,
+                  input_shape=input_shape,
+                  pooling=pooling,
+                  classes=classes, **kwargs)
 
 
 def ResNet101V2(
@@ -602,7 +600,7 @@ def ResNet101V2(
         input_shape=None,
         pooling=None,
         classes=NUM_CLASSES,
-        classifier_activation='softmax'):
+        **kwargs):
     """Instantiates the ResNet101V2 architecture."""
     def stack_fn(x):
         x = stack_residual_block2(x, 64, 3, name='conv2')
@@ -610,18 +608,16 @@ def ResNet101V2(
         x = stack_residual_block2(x, 256, 23, name='conv4')
         return stack_residual_block2(x, 512, 3, stride1=1, name='conv5')
 
-    return ResNet(
-        stack_fn,
-        True,
-        True,
-        'resnet101v2',
-        include_top,
-        weights,
-        input_tensor,
-        input_shape,
-        pooling,
-        classes,
-        classifier_activation=classifier_activation)
+    return ResNet(stack_fn=stack_fn,
+                  preact=False,
+                  use_bias=True,
+                  model_name='resnet101v2',
+                  include_top=include_top,
+                  weights=weights,
+                  input_tensor=input_tensor,
+                  input_shape=input_shape,
+                  pooling=pooling,
+                  classes=classes, **kwargs)
 
 
 def ResNet152V2(
@@ -631,7 +627,7 @@ def ResNet152V2(
         input_shape=None,
         pooling=None,
         classes=NUM_CLASSES,
-        classifier_activation='softmax'):
+        **kwargs):
     """Instantiates the ResNet152V2 architecture."""
     def stack_fn(x):
         x = stack_residual_block2(x, 64, 3, name='conv2')
@@ -639,18 +635,16 @@ def ResNet152V2(
         x = stack_residual_block2(x, 256, 36, name='conv4')
         return stack_residual_block2(x, 512, 3, stride1=1, name='conv5')
 
-    return ResNet(
-        stack_fn,
-        True,
-        True,
-        'resnet152v2',
-        include_top,
-        weights,
-        input_tensor,
-        input_shape,
-        pooling,
-        classes,
-        classifier_activation=classifier_activation)
+    return ResNet(stack_fn=stack_fn,
+                  preact=True,
+                  use_bias=True,
+                  model_name='resnet152v2',
+                  include_top=include_top,
+                  weights=weights,
+                  input_tensor=input_tensor,
+                  input_shape=input_shape,
+                  pooling=pooling,
+                  classes=classes, **kwargs)
 
 
 def preprocess_input_resnet(x, data_format=None):
