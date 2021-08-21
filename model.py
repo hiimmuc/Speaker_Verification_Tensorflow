@@ -36,10 +36,11 @@ def define_model(args, input_shape, num_classes, plot_model_graph=True, summary=
     loss_function = tf.keras.losses.CategoricalCrossentropy()
 
     train_loss = tf.keras.metrics.Mean(name='train_loss')
-    train_accuracy = tf.keras.metrics.CategoricalAccuracy()
+    train_accuracy = tf.keras.metrics.CategoricalAccuracy(
+        name='train_accuracy')
 
     val_loss = tf.keras.metrics.Mean(name='val_loss')
-    val_accuracy = tf.keras.metrics.CategoricalAccuracy()
+    val_accuracy = tf.keras.metrics.CategoricalAccuracy(name='val_accuracy')
 
     # get network
 
