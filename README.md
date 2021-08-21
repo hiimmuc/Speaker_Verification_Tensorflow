@@ -1,6 +1,7 @@
 # SpeakerVerificaiton
 Speaker verification with zalo ai challenge dataset
 ## Dependencies
+python version: 3.8.11
 ```
 pip install -r requirements.txt
 ```
@@ -16,11 +17,17 @@ python dataprep.py
 ## Training
 Training from scratch
 ```
-python main.py
+python main.py --do_train --report
+```
+Evluating model
+```
+python main.py --do_eval
 ```
 
 ## Testing and inference
-[in progress] 😅
+```
+python test.py
+```
 
 ## Citation
 ...
