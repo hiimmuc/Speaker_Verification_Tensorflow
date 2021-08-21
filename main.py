@@ -1,4 +1,5 @@
 import argparse
+import sys
 
 from model import *
 from trainer import Trainer
@@ -22,6 +23,12 @@ def main(args):
         trainer.evaluate()
 
 
+def report_args(args):
+    print('\nParameters:')
+    for k, v in vars(args).items():
+        print('- {}: {}'.format(k, v))
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # Control flow
@@ -30,7 +37,7 @@ if __name__ == '__main__':
     parser.add_argument("--do_eval", default=False,
                         action='store_true', help="valid model?")
     # hyperparameters
-    parser.add_argument("--model", default="resnet34", type=str,
+    parser.add_argument("--model", default="resnet50", type=str,
                         help="The backbone model. Available: resnet18, resnet34, resnet50, resnet101, resnet152,  vgg-m, vgg-custom, vgg16")
     parser.add_argument("--epochs", default=25, type=int,
                         help="Number of training epochs")
@@ -42,7 +49,7 @@ if __name__ == '__main__':
                         type=int, help="Batch size for evaluation.")
     parser.add_argument("--learning_rate", default=3e-4,
                         type=float, help="The initial learning rate")
-    parser.add_argument("--adam_epsilon", default=1e-8,
+    parser.add_argument("--adam_epsilon", default=1e-7,
                         type=float, help="Epsilon for Adam optimizer.")
     parser.add_argument("--momentum", default=0.9, type=float,
                         help="Momentum for SGD optimizer")
@@ -55,6 +62,11 @@ if __name__ == '__main__':
                         help="saved directory for weight, logging files")
     parser.add_argument("--use_pretrained", default=False, type=bool,
                         help="decide wether train from scratch or saved checkpoints")
+    #
+    parser.add_argument("--report", default=False, type=bool,
+                        help="make report of parameters")
 
     args = parser.parse_args()
+    if args.report:
+        report_args(args)
     main(args)

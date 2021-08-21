@@ -1,6 +1,7 @@
 import importlib
 
 import numpy as np
+import tensorflow as tf
 from tensorflow.keras.optimizers import SGD, Adam
 from tensorflow.keras.utils import plot_model
 
@@ -20,6 +21,7 @@ def get_net(args, **kwargs):
 
 
 def define_model(args, input_shape, num_classes, plot_model_graph=True, summary=True):
+    # optimizer
     learning_rate = args.learning_rate
     if args.optimizer == 'SGD':
         momentum = args.momentum
@@ -30,6 +32,17 @@ def define_model(args, input_shape, num_classes, plot_model_graph=True, summary=
         epsilon = args.adam_epsilon
         opt = Adam(learning_rate=learning_rate, epsilon=epsilon)
 
+    # Loss
+    loss_function = tf.keras.losses.CategoricalCrossentropy()
+
+    train_loss = tf.keras.metrics.Mean(name='train_loss')
+    train_accuracy = tf.keras.metrics.CategoricalAccuracy()
+
+    val_loss = tf.keras.metrics.Mean(name='val_loss')
+    val_accuracy = tf.keras.metrics.CategoricalAccuracy()
+
+    # get network
+
     net = get_net(args)
     model = net(args, input_shape, num_classes)
 
@@ -39,9 +52,9 @@ def define_model(args, input_shape, num_classes, plot_model_graph=True, summary=
         save_img = args.save_dir + '/' + args.model + '_model.png'
         plot_model(model, to_file=save_img,
                    show_shapes=True, show_layer_names=True)
-
-    model.compile(loss='categorical_crossentropy',
-                  metrics=['accuracy'], optimizer=opt)
+    # complile model
+    model.compile(optimizer=opt, loss=loss_function, metrics=[
+                  train_loss, train_accuracy, val_loss, val_accuracy])
 
     return model
 

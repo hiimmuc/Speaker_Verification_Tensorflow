@@ -47,9 +47,9 @@ class Trainer:
         checkpoint = ModelCheckpoint(
             filepath=checkpoint_path, monitor='val_loss', verbose=1, save_best_only=True)
         es_callback = EarlyStopping(
-            monitor='val_loss', patience=int(0.2*num_epochs), mode='min', verbose=1)
+            monitor='val_loss', patience=10, mode='min', verbose=1)
         reduce_lr = ReduceLROnPlateau(
-            monitor='val_loss', factor=0.9, patience=int(0.1*num_epochs), verbose=0, mode='min', min_lr=0)
+            monitor='val_loss', factor=0.85, patience=5, verbose=1, mode='min', min_lr=1e-6)
 
         if val_on_train:
             history = self.model.fit(self.x_train, self.y_train, batch_size=num_batch_size, epochs=num_epochs,
