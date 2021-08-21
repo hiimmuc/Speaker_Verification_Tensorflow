@@ -8,7 +8,7 @@ from models import *
 
 def get_net(args, **kwargs):
     if 'resnet' in args.model:
-        model_name = 'resnet'
+        model_name = 'resnet_beta'
     elif 'vgg' in args.model:
         model_name = 'vgg'
     else:
@@ -28,12 +28,13 @@ def define_model(args, input_shape, num_classes, summary=True):
     elif args.optimizer == 'Adam':
         epsilon = args.adam_epsilon
         opt = Adam(learning_rate=learning_rate, epsilon=epsilon)
+        
     net = get_net(args)
     model = net(args, input_shape, num_classes)
+    
     if summary:
         model.summary()
-    if 'resnet' in args.model:
-        opt = args.optimizer
+
     model.compile(loss='categorical_crossentropy',
                   metrics=['accuracy'], optimizer=opt)
 

@@ -615,14 +615,14 @@ setattr(ResNet152, '__doc__', ResNet152.__doc__ + DOC)
 
 def construct_net(args, input_shape, num_classes, **kwargs):
     if args.model == 'resnet18':
-        return ResNet18(input_shape=input_shape, classes=num_classes, **kwargs)
+        return ResNet18(input_shape=input_shape, weights=None, classes=num_classes, **kwargs)
     elif args.model == 'resnet34':
-        return ResNet34(input_shape=input_shape, classes=num_classes, **kwargs)
+        return ResNet34(input_shape=input_shape, weights=None, classes=num_classes, **kwargs)
     elif args.model == 'resnet50':
-        return ResNet50(input_shape=input_shape, classes=num_classes, **kwargs)
+        return ResNet50(input_shape=input_shape, weights=None, classes=num_classes, **kwargs)
     elif args.model == 'resnet101':
-        return ResNet101(input_shape=input_shape, classes=num_classes, **kwargs)
+        return ResNet101(input_shape=input_shape, weights=None, classes=num_classes, **kwargs)
     elif args.model == 'resnet152':
-        return ResNet152(input_shape=input_shape, classes=num_classes, **kwargs)
+        return ResNet152(input_shape=input_shape, weights=None, classes=num_classes, **kwargs)
     else:
         raise 'wrong model name'
