@@ -485,6 +485,33 @@ def ResNet34(include_top=True,
                   classes=classes, **kwargs)
 
 
+def ResNet34L(include_top=True,
+              weights=None,
+              input_tensor=None,
+              input_shape=None,
+              pooling=None,
+              classes=NUM_CLASSES,
+              **kwargs):
+    """Instantiates the ResNet34 architecture."""
+
+    def stack_fn(x):
+        x = stack_basic_block(x, 16, 3, stride1=1, name='conv2')
+        x = stack_basic_block(x, 32, 4, name='conv3')
+        x = stack_basic_block(x, 64, 6, name='conv4')
+        return stack_basic_block(x, 128, 3, name='conv5')
+
+    return ResNet(stack_fn=stack_fn,
+                  preact=False,
+                  use_bias=True,
+                  model_name='resnet34',
+                  include_top=include_top,
+                  weights=weights,
+                  input_tensor=input_tensor,
+                  input_shape=input_shape,
+                  pooling=pooling,
+                  classes=classes, **kwargs)
+
+
 def ResNet50(include_top=True,
              weights=None,
              input_tensor=None,
@@ -661,6 +688,8 @@ def construct_net(args, input_shape, num_classes, **kwargs):
         return ResNet18(input_shape=input_shape, weights=None, classes=num_classes, **kwargs)
     elif args.model == 'resnet34':
         return ResNet34(input_shape=input_shape, weights=None, classes=num_classes, **kwargs)
+    elif args.model == 'resnet34l':
+        return ResNet34L(input_shape=input_shape, weights=None, classes=num_classes, **kwargs)
     elif args.model == 'resnet50':
         return ResNet50(input_shape=input_shape, weights=None, classes=num_classes, **kwargs)
     elif args.model == 'resnet101':
