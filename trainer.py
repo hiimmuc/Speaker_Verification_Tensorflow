@@ -76,10 +76,10 @@ class Trainer:
     def evaluate(self):
         # Evaluating the model on the training and testing set
         score = self.model.evaluate(
-            self.x_train, self.y_train, batch_size=self.args.test_batch_size, verbose=0)
+            self.x_train, self.y_train, batch_size=self.args.eval_batch_size, verbose=0)
         print("Training Accuracy: ", score[1])
         score = self.model.evaluate(
-            self.x_val, self.y_val, batch_size=self.args.test_batch_size, verbose=0)
+            self.x_val, self.y_val, batch_size=self.args.eval_batch_size, verbose=0)
         print("Validation Accuracy: ", score[1])
 
     def load_model(self):
