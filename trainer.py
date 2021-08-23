@@ -3,6 +3,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
+from tensorflow.keras import callbacks
 from tensorflow.keras.callbacks import (EarlyStopping, ModelCheckpoint,
                                         ReduceLROnPlateau)
 from tensorflow.keras.models import load_model
@@ -50,17 +51,22 @@ class Trainer:
             monitor='val_loss', patience=10, mode='min', verbose=1)
         reduce_lr = ReduceLROnPlateau(
             monitor='val_loss', factor=0.85, patience=5, verbose=1, mode='min', min_lr=1e-6)
-
+        callbacks = [checkpoint]
+        if not self.args.early_stop_off:
+            callbacks.append(es_callback)
+        if not self.args.reduce_lr_off:
+            callbacks.append(reduce_lr)
+        # training
         if val_on_train:
             history = self.model.fit(self.x_train, self.y_train, batch_size=num_batch_size, epochs=num_epochs,
                                      validation_split=0.15,
                                      shuffle=True,
-                                     callbacks=[checkpoint, es_callback, reduce_lr])
+                                     callbacks=callbacks)
         else:
             history = self.model.fit(self.x_train, self.y_train, validation_data=(self.x_val, self.y_val),
                                      batch_size=num_batch_size,
                                      epochs=num_epochs,
-                                     callbacks=[checkpoint, es_callback, reduce_lr])
+                                     callbacks=callbacks)
 
         self.model.save(os.path.join(
             self.save_dir, '{}_last_epoch.h5'.format(self.args.model)))

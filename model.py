@@ -35,6 +35,7 @@ def define_model(args, input_shape, num_classes, plot_model_graph=True, summary=
     # Loss
     loss_function = tf.keras.losses.CategoricalCrossentropy()
 
+    # metric
     train_loss = tf.keras.metrics.Mean(name='train_loss')
     train_accuracy = tf.keras.metrics.CategoricalAccuracy(
         name='train_accuracy')

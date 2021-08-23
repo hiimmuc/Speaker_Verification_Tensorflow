@@ -65,6 +65,11 @@ if __name__ == '__main__':
     #
     parser.add_argument("--report", default=False, action='store_true',
                         help="make report of parameters")
+    # callbacks
+    parser.add_argument("--early_stop_off", default=False, action='store_true',
+                        help="make report of parameters")
+    parser.add_argument("--reduce_lr_off", default=False, action='store_true',
+                        help="make report of parameters")
 
     args = parser.parse_args()
     if args.report:
