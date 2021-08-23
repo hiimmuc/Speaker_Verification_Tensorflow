@@ -96,7 +96,7 @@ class Trainer:
         plt.xlabel('Epoch')
         plt.legend(['Train', 'Test'], loc='upper left')
         plt.show()
-        plt.savefig(self.save_dir+'/accuracy.png')
+        plt.savefig(self.save_dir+f'/{self.args.model}_accuracy.png')
         # plt.clf()
         # Plot training & validation loss values
         plt.figure()
@@ -107,4 +107,4 @@ class Trainer:
         plt.xlabel('Epoch')
         plt.legend(['Train', 'Test'], loc='upper left')
         plt.show()
-        plt.savefig(self.save_dir+'/loss.png')
+        plt.savefig(self.save_dir+f'/{self.args.model}_loss.png')
