@@ -41,14 +41,22 @@ class Inference():
 
     def load_model_no_top(self, summary=False):
         prev_model = tf.keras.models.load_model(self.model_path)
-        prev_model.pop()
+        model_old = pop_layer(prev_model)
+        # prev_model.pop()
+        # model_old = pop_layer(model)
+
+        # Now add a new layer to the model
+        model_new = tf.keras.models.Sequential()
+        model_new.add(model_old)
+        model_new.compile(loss='sparse_categorical_crossentropy', optimizer='sgd',
+                          metrics=['accuracy'])
         if summary:
-            prev_model.summary()
-        new_model = tf.keras.models.Model(
-            inputs=prev_model.input, outputs=prev_model.layers[-1].output)
-        new_model.compile(loss='categorical_crossentropy',
-                          optimizer=Adam(lr=0.0001), metrics=['accuracy'])
-        return new_model
+            model_new.summary()
+        # new_model = tf.keras.models.Model(
+        #     inputs=prev_model.input, outputs=prev_model.layers[-1].output)
+        # new_model.compile(loss='categorical_crossentropy',
+        #                   optimizer=Adam(lr=0.0001), metrics=['accuracy'])
+        return model_new
 
     def run_eval(self, threshold=0.5):
 
@@ -88,6 +96,20 @@ class Inference():
         print('Done!')
 
         pass
+
+
+def pop_layer(model):
+    if not model.outputs:
+        raise Exception('Sequential model cannot be popped: model is empty.')
+    model.layers.pop()
+    if not model.layers:
+        model.outputs = []
+        model.inbound_nodes = []
+        model.outbound_nodes = []
+    else:
+        model.layers[-1].outbound_nodes = []
+        model.outputs = [model.layers[-1].output]
+    return model
 
 
 def run_inference(args):
