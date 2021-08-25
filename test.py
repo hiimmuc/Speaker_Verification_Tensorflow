@@ -1,5 +1,7 @@
 import csv
 import os
+import random
+import sys
 import time
 
 import numpy as np
@@ -12,6 +14,8 @@ from tqdm.notebook import tqdm
 from data_prep import FeatureExtraction
 from model import *
 from ultis import *
+
+print_interval = 10
 
 
 class Inference():
@@ -35,7 +39,7 @@ class Inference():
     def get_score_of_pair(self, wav1, wav2):
         emb1 = self.get_embedding(wav1)
         emb2 = self.get_embedding(wav2)
-        return abs(1 - cosine_similarity(emb1, emb2))
+        return sum(cosine_similarity(emb1, emb2))
 
     def load_model_no_top(self, summary=False):
         net = define_model(
@@ -50,9 +54,62 @@ class Inference():
             model_new.summary()
         return model_new
 
-    def run_eval(self, test_datset, threshold=0.5):
+    def run_eval(self, listfilename,  threshold=0.5):
+        lines = []
+        files = []
+        feats = {}
+        tstart = time.time()
+        # Read all lines
+        with open(listfilename) as listfile:
+            while True:
+                line = listfile.readline()
+                if not line:
+                    break
+                data = line.split()
 
-        pass
+                # Append random label if missing
+                if len(data) == 2:
+                    data = [random.randint(0, 1)] + data
+
+                files.append(data[1])
+                files.append(data[2])
+                lines.append(line)
+
+        setfiles = list(set(files))
+        setfiles.sort()
+        all_scores = []
+        all_labels = []
+        all_trials = []
+        # Read files and compute all scores
+        for idx, line in enumerate(lines):
+            data = line.split()
+
+            # Append random label if missing
+            if len(data) == 2:
+                data = [random.randint(0, 1)] + data
+
+            score = self.get_score_of_pair(data[1], data[2])
+            all_scores.append(score)
+            all_labels.append(int(data[0]))
+            all_trials.append(data[1] + ' ' + data[2])
+
+            if idx % 100 == 0:
+                print('Processed {}/{} files'.format(idx, len(lines)))
+
+            # NOTE: distance for training, normalized score for evaluating and testing
+
+            all_scores.append(score)
+            all_labels.append(int(data[0]))
+            all_trials.append(data[1] + " " + data[2])
+
+            if idx % print_interval == 0:
+                telapsed = time.time() - tstart
+                sys.stdout.write("\rComputing %d of %d: %.2f Hz - %.4f s" %
+                                 (idx, len(lines), (idx + 1) / telapsed, telapsed / (idx + 1)))
+                sys.stdout.flush()
+
+        print('\n')
+        print(all_scores, all_labels, all_trials)
 
     def run_test(self, threshold=0.5):
         root = self.args.data_dir
@@ -100,6 +157,7 @@ def run_inference(args, test_dataset=None):
 
 
 # def eer_eval():
+#     min_thres = 0.2
 #     step = 1e-1
 #     diff = 1
 #     EER = 0
