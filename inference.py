@@ -110,6 +110,7 @@ class Inference():
 
         print('\n')
         print(all_scores, all_labels, all_trials)
+        print('Done!')
 
     def run_test(self, threshold=0.5):
         root = self.args.data_dir
@@ -117,6 +118,8 @@ class Inference():
         read_file = os.path.join(root, 'public-test.csv')
         write_file = os.path.join(
             root, f'submission_model_{self.args.model}.csv')
+        backup_file = os.path.join(
+            root, f'backup_pair_of_features_{self.args.model}_backup.npz')
         lines = []
         files = []
         feats = {}
@@ -132,17 +135,24 @@ class Inference():
         setfiles = list(set(files))
         setfiles.sort()
         print('Reading files times:{}'.format(time.time() - tstart))
+
         with open(write_file, 'w', newline='') as wf:
             spamwriter = csv.writer(wf, delimiter=',')
-            spamwriter.writerow(['audio_1', 'audio_2', 'label'])
+            spamwriter.writerow(['audio_1', 'audio_2', 'label', 'score'])
             for idx, data in tqdm(enumerate(lines)):
-                pred = self.get_score_of_pair(
-                    os.path.join(data_root, data[0]),
-                    os.path.join(data_root, data[1]))
+                feat1 = self.get_embedding(os.path.join(
+                    os.path.join(data_root, data[0])))
+                feat2 = self.get_embedding(os.path.join(
+                    os.path.join(data_root, data[1])))
+                pred = sum(cosine_similarity(feat1, feat2))
+
                 if pred > threshold:
                     spamwriter.writerow([data[0], data[1], 1, pred])
                 else:
                     spamwriter.writerow([data[0], data[1], 0, pred])
+                feats[idx] = [feat1, feat2]
+
+        np.savez_compressed(backup_file, feats=feats)
         print('Done!')
 
 
