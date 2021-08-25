@@ -13,6 +13,7 @@ from tensorflow.keras.optimizers import Adam
 from tqdm import tqdm
 
 from data_prep import FeatureExtraction
+from model import *
 from ultis import *
 
 
@@ -21,12 +22,13 @@ def get_audio_path(folder):
 
 
 class Inference():
-    def __init__(self, args, model_path, model_name, summary=False):
+    def __init__(self, args, model_path, model_name, test_set=None, summary=False):
         self.args = args
         self.model_path = model_path
         self.model_name = model_name
         self.model = self.load_model_no_top(summary=summary)
         self.extrac_engine = FeatureExtraction()
+        self.x_test, self.y_test = test_set
 
     def get_embedding(self, wav_path):
         feat = self.extrac_engine.extract_feature_frame()(wav_path)
@@ -40,25 +42,28 @@ class Inference():
         return abs(1 - spatial.distance.cosine(emb1, emb2))
 
     def load_model_no_top(self, summary=False):
-        prev_model = tf.keras.models.load_model(self.model_path)
-        model_old = pop_layer(prev_model)
+        # prev_model = tf.keras.models.load_model(self.model_path)
+        # model_old = pop_layer(prev_model)
         # prev_model.pop()
-        # model_old = pop_layer(model)
+        # model_old = pop_layer(model)\
+        net = define_model(
+            self.args, self.x_test.shape[1:], self.args.num_classes, self.args.model_path, False)
 
-        # Now add a new layer to the model
-        model_new = tf.keras.models.Sequential()
-        model_new.add(model_old)
-        model_new.compile(loss='sparse_categorical_crossentropy', optimizer='sgd',
-                          metrics=['accuracy'])
+        # # Now add a new layer to the model
+        # # model_new = tf.keras.models.Sequential()
+        # # model_new.add(model_old)
+        # model_new.compile(loss='sparse_categorical_crossentropy', optimizer='sgd',
+        #                   metrics=['accuracy'])
+
+        model_new = tf.keras.models.Model(
+            inputs=net.input, outputs=net.layers[-1].output)
+        model_new.compile(loss='categorical_crossentropy',
+                          optimizer=Adam(lr=0.0001), metrics=['accuracy'])
         if summary:
             model_new.summary()
-        # new_model = tf.keras.models.Model(
-        #     inputs=prev_model.input, outputs=prev_model.layers[-1].output)
-        # new_model.compile(loss='categorical_crossentropy',
-        #                   optimizer=Adam(lr=0.0001), metrics=['accuracy'])
         return model_new
 
-    def run_eval(self, threshold=0.5):
+    def run_eval(self, test_datset, threshold=0.5):
 
         pass
 
@@ -98,27 +103,28 @@ class Inference():
         pass
 
 
-def pop_layer(model):
-    if not model.outputs:
-        raise Exception('Sequential model cannot be popped: model is empty.')
-    model.layers.pop()
-    if not model.layers:
-        model.outputs = []
-        model.inbound_nodes = []
-        model.outbound_nodes = []
-    else:
-        model.layers[-1].outbound_nodes = []
-        model.outputs = [model.layers[-1].output]
-    return model
+# def pop_layer(model):
+#     if not model.outputs:
+#         raise Exception('Sequential model cannot be popped: model is empty.')
+#     model.layers.pop()
+#     if not model.layers:
+#         model.outputs = []
+#         model.inbound_nodes = []
+#         model.outbound_nodes = []
+#     else:
+#         model.layers[-1].outbound_nodes = []
+#         model.outputs = [model.layers[-1].output]
+#     return model
 
 
-def run_inference(args):
-    model_path = args.save_dir + '{}_weights_best.hdf5'.format(args.model_name)
-    infer_engine = Inference(model_path=model_path, model_name=args.model_name)
+def run_inference(args, test_dataset=None):
+    model_path = os.path.join(args.save_dir, f'{args.model}_weights_best.hdf5')
+    infer_engine = Inference(args, model_path=model_path,
+                             model_name=args.model)
     if args.do_test:
         infer_engine.run_test()
     elif args.do_eval:
-        infer_engine.run_eval()
+        infer_engine.run_eval(test_dataset)
     pass
 
 

@@ -20,7 +20,7 @@ def get_net(args, **kwargs):
     return net
 
 
-def define_model(args, input_shape, num_classes, plot_model_graph=True, summary=True):
+def define_model(args, input_shape, num_classes, weights=None, include_top=True, plot_model_graph=True, summary=True):
     # optimizer
     learning_rate = args.learning_rate
     if args.optimizer == 'SGD':
@@ -47,7 +47,8 @@ def define_model(args, input_shape, num_classes, plot_model_graph=True, summary=
     # get network
 
     net = get_net(args)
-    model = net(args, input_shape, num_classes)
+    model = net(args, input_shape, num_classes,
+                weights=weights, include_top=include_top)
 
     if summary:
         model.summary()

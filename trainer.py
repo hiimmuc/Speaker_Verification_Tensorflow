@@ -29,7 +29,7 @@ class Trainer:
         self.x_val, self.y_val = self.dev_dts
         self.x_train, self.y_train = self.train_dts
         self.model = define_model(
-            args, input_shape=self.x_train.shape[1:], num_classes=400, summary=True)
+            args, input_shape=self.x_train.shape[1:], num_classes=400, summary=False)
 
     def train(self, val_on_train=True):
         checkpoint_path = self.ckpt_path
