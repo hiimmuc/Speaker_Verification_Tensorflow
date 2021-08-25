@@ -1,7 +1,6 @@
 import argparse
-import sys
-from test import *
 
+from inference import *
 from model import *
 from trainer import Trainer
 from ultis import load_dataset
