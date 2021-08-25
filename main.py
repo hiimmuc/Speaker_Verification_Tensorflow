@@ -1,5 +1,6 @@
 import argparse
 import sys
+from test import *
 
 from model import *
 from trainer import Trainer
@@ -21,6 +22,9 @@ def main(args):
     if args.do_eval:
         trainer.load_model()
         trainer.evaluate()
+
+    elif args.do_test:
+        run_inference(args)
 
 
 def report_args(args):
