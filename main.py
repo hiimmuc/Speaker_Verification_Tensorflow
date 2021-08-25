@@ -40,6 +40,8 @@ if __name__ == '__main__':
                         action='store_true', help="Train model?")
     parser.add_argument("--do_eval", default=False,
                         action='store_true', help="valid model?")
+    parser.add_argument("--do_test", default=False,
+                        action='store_true', help="test model?")
     # hyperparameters
     parser.add_argument("--model", default="resnet50", type=str,
                         help="The backbone model. Available: resnet18, resnet34, resnet50, resnet101, resnet152,  vgg-m, vgg-custom, vgg16")
