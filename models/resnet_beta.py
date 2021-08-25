@@ -711,26 +711,26 @@ def decode_predictions_resnet(preds, top=5):
     return decode_predictions(preds, top=top)
 
 
-def construct_net(args, input_shape, num_classes, include_top=True, **kwargs):
+def construct_net(args, input_shape, num_classes, weights=None, include_top=True, **kwargs):
     if args.model == 'resnet18':
-        return ResNet18(input_shape=input_shape, weights=None, classes=num_classes, include_top=True, **kwargs)
+        return ResNet18(input_shape=input_shape, Weights=weights, classes=num_classes, include_top=include_top, **kwargs)
     elif args.model == 'resnet34':
-        return ResNet34(input_shape=input_shape, weights=None, classes=num_classes, include_top=True, **kwargs)
+        return ResNet34(input_shape=input_shape, Weights=weights, classes=num_classes, include_top=include_top, **kwargs)
     elif args.model == 'resnet34l':
-        return ResNet34L(input_shape=input_shape, weights=None, classes=num_classes, include_top=True, **kwargs)
+        return ResNet34L(input_shape=input_shape, Weights=weights, classes=num_classes, include_top=include_top, **kwargs)
     elif args.model == 'resnet34lh':
-        return ResNet34LH(input_shape=input_shape, weights=None, classes=num_classes, include_top=True, **kwargs)
+        return ResNet34LH(input_shape=input_shape, Weights=weights, classes=num_classes, include_top=include_top, **kwargs)
     elif args.model == 'resnet50':
-        return ResNet50(input_shape=input_shape, weights=None, classes=num_classes, include_top=True, **kwargs)
+        return ResNet50(input_shape=input_shape, Weights=weights, classes=num_classes, include_top=include_top, **kwargs)
     elif args.model == 'resnet101':
-        return ResNet101(input_shape=input_shape, weights=None, classes=num_classes, include_top=True, **kwargs)
+        return ResNet101(input_shape=input_shape, Weights=weights, classes=num_classes, include_top=include_top, **kwargs)
     elif args.model == 'resnet152':
-        return ResNet152(input_shape=input_shape, weights=None, classes=num_classes, include_top=True, **kwargs)
+        return ResNet152(input_shape=input_shape, Weights=weights, classes=num_classes, include_top=include_top, **kwargs)
     elif args.model == 'resnet50v2':
-        return ResNet50V2(input_shape=input_shape, weights=None, classes=num_classes, include_top=True, **kwargs)
+        return ResNet50V2(input_shape=input_shape, Weights=weights, classes=num_classes, include_top=include_top, **kwargs)
     elif args.model == 'resnet101v2':
-        return ResNet101V2(input_shape=input_shape, weights=None, classes=num_classes, include_top=True, **kwargs)
+        return ResNet101V2(input_shape=input_shape, Weights=weights, classes=num_classes, include_top=include_top, **kwargs)
     elif args.model == 'resnet152v2':
-        return ResNet152V2(input_shape=input_shape, weights=None, classes=num_classes, include_top=True, **kwargs)
+        return ResNet152V2(input_shape=input_shape, Weights=weights, classes=num_classes, include_top=include_top, **kwargs)
     else:
         raise 'Invalid model name'

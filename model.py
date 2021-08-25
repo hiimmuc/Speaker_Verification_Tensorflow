@@ -47,8 +47,11 @@ def define_model(args, input_shape, num_classes, weights=None, include_top=True,
     # get network
 
     net = get_net(args)
-    model = net(args, input_shape, num_classes,
-                weights=weights, include_top=include_top)
+    model = net(args=args,
+                input_shape=input_shape,
+                num_classes=num_classes,
+                weights=weights,
+                include_top=include_top)
 
     if summary:
         model.summary()
