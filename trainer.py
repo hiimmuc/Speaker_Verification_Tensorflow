@@ -23,11 +23,9 @@ class Trainer:
         self.save_dir = self.args.save_dir
         self.ckpt_path = os.path.join(
             self.save_dir, '{}_weights_best.hdf5'.format(self.args.model))
-        self.train_dts = train_dts
-        self.dev_dts = dev_dts
         self.test_dts = test_dts
-        self.x_val, self.y_val = self.dev_dts
-        self.x_train, self.y_train = self.train_dts
+        self.x_val, self.y_val = dev_dts
+        self.x_train, self.y_train = train_dts
         self.model = define_model(
             args, input_shape=self.x_train.shape[1:], num_classes=400, summary=False)
 

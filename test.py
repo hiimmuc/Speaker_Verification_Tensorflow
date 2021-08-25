@@ -1,24 +1,17 @@
 import csv
-import glob
 import os
 import time
-from datetime import datetime
 
-import librosa.display
-import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 from scipy import spatial
+from sklearn.metrics.pairwise import cosine_similarity
 from tensorflow.keras.optimizers import Adam
-from tqdm import tqdm
+from tqdm.notebook import tqdm
 
 from data_prep import FeatureExtraction
 from model import *
 from ultis import *
-
-
-def get_audio_path(folder):
-    return glob.glob(os.path.join(folder, '*.wav'))
 
 
 class Inference():
@@ -26,37 +19,31 @@ class Inference():
         self.args = args
         self.model_path = model_path
         self.model_name = model_name
-        self.model = self.load_model_no_top(summary=summary)
+
+        self.x_test, self.y_test = (None, None) if not test_set else test_set
         self.extrac_engine = FeatureExtraction()
-        self.x_test, self.y_test = test_set
+        self.model = self.load_model_no_top(summary=summary)
 
     def get_embedding(self, wav_path):
-        feat = self.extrac_engine.extract_feature_frame()(wav_path)
+        feat, _ = self.extrac_engine.extract_feature_frame(wav_path)
         feat = np.expand_dims(feat, axis=0)
+        # print(feat,'feature size:', feat.shape)
+        feat = np.asanyarray(feat).astype(np.float32)
         embedding = self.model.predict(feat)
         return embedding
 
     def get_score_of_pair(self, wav1, wav2):
         emb1 = self.get_embedding(wav1)
         emb2 = self.get_embedding(wav2)
-        return abs(1 - spatial.distance.cosine(emb1, emb2))
+        return abs(1 - cosine_similarity(emb1, emb2))
 
     def load_model_no_top(self, summary=False):
-        # prev_model = tf.keras.models.load_model(self.model_path)
-        # model_old = pop_layer(prev_model)
-        # prev_model.pop()
-        # model_old = pop_layer(model)\
         net = define_model(
-            self.args, self.x_test.shape[1:], self.args.num_classes, self.args.model_path, False)
+            self.args, self.x_test.shape[1:], 400, self.model_path, False, summary=summary)
 
-        # # Now add a new layer to the model
-        # # model_new = tf.keras.models.Sequential()
-        # # model_new.add(model_old)
-        # model_new.compile(loss='sparse_categorical_crossentropy', optimizer='sgd',
-        #                   metrics=['accuracy'])
-
-        model_new = tf.keras.models.Model(
-            inputs=net.input, outputs=net.layers[-1].output)
+        model_new = tf.keras.models.Sequential()
+        model_new.add(net)
+        model_new.add(tf.keras.layers.GlobalAveragePooling2D())
         model_new.compile(loss='categorical_crossentropy',
                           optimizer=Adam(lr=0.0001), metrics=['accuracy'])
         if summary:
@@ -68,10 +55,11 @@ class Inference():
         pass
 
     def run_test(self, threshold=0.5):
-        root = self.args.save_dir
+        root = self.args.data_dir
         data_root = os.path.join(root, 'public_test/data_test')
         read_file = os.path.join(root, 'public-test.csv')
-        write_file = os.path.join(root, 'submission.csv')
+        write_file = os.path.join(
+            root, f'submission_model_{self.args.model}.csv')
         lines = []
         files = []
         feats = {}
@@ -95,37 +83,20 @@ class Inference():
                     os.path.join(data_root, data[0]),
                     os.path.join(data_root, data[1]))
                 if pred > threshold:
-                    spamwriter.writerow([data[0], data[1], 1])
+                    spamwriter.writerow([data[0], data[1], 1, pred])
                 else:
-                    spamwriter.writerow([data[0], data[1], 0])
+                    spamwriter.writerow([data[0], data[1], 0, pred])
         print('Done!')
-
-        pass
-
-
-# def pop_layer(model):
-#     if not model.outputs:
-#         raise Exception('Sequential model cannot be popped: model is empty.')
-#     model.layers.pop()
-#     if not model.layers:
-#         model.outputs = []
-#         model.inbound_nodes = []
-#         model.outbound_nodes = []
-#     else:
-#         model.layers[-1].outbound_nodes = []
-#         model.outputs = [model.layers[-1].output]
-#     return model
 
 
 def run_inference(args, test_dataset=None):
     model_path = os.path.join(args.save_dir, f'{args.model}_weights_best.hdf5')
     infer_engine = Inference(args, model_path=model_path,
-                             model_name=args.model)
+                             model_name=args.model, test_set=test_dataset, summary=False)
     if args.do_test:
         infer_engine.run_test()
     elif args.do_eval:
         infer_engine.run_eval(test_dataset)
-    pass
 
 
 # def eer_eval():
