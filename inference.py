@@ -16,7 +16,8 @@ from model import *
 from ultis import *
 
 print_interval = 10
-
+START = 0
+STOP = 40000
 
 class Inference():
     def __init__(self, args, model_path, model_name, test_set=None, summary=False):
@@ -139,7 +140,7 @@ class Inference():
         with open(write_file, 'w', newline='') as wf:
             spamwriter = csv.writer(wf, delimiter=',')
             spamwriter.writerow(['audio_1', 'audio_2', 'label', 'score'])
-            for idx, data in tqdm(enumerate(lines)):
+            for idx, data in tqdm(enumerate(lines[START:STOP])):
                 feat1 = self.get_embedding(os.path.join(
                     os.path.join(data_root, data[0])))
                 feat2 = self.get_embedding(os.path.join(
