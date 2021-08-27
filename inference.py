@@ -145,7 +145,7 @@ class Inference():
                     os.path.join(data_root, data[0])))
                 feat2 = self.get_embedding(os.path.join(
                     os.path.join(data_root, data[1])))
-                pred = sum(cosine_similarity(feat1, feat2))
+                pred = abs(1 - spatial.distance.cosine(feat1, feat2))
 
                 if pred > threshold:
                     spamwriter.writerow([data[0], data[1], 1, pred])
