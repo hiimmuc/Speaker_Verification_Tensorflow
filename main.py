@@ -23,7 +23,7 @@ def main(args):
         trainer.evaluate()
 
     elif args.do_test:
-        run_inference(args)
+        run_inference(args, train_dataset)
 
 
 def report_args(args):
