@@ -25,7 +25,7 @@ class Inference():
         self.model_path = model_path
         self.model_name = model_name
 
-        self.x_test, self.y_test = (None, None) if not test_set else test_set
+        self.x_test, self.y_test = test_set
         self.extrac_engine = FeatureExtraction()
         self.model = self.load_model_no_top(summary=summary)
 
@@ -160,7 +160,7 @@ class Inference():
 def run_inference(args, test_dataset=None):
     model_path = os.path.join(args.save_dir, f'{args.model}_weights_best.hdf5')
     infer_engine = Inference(args, model_path=model_path,
-                             model_name=args.model, test_set=test_dataset, summary=True)
+                             model_name=args.model, test_set=test_dataset, summary=False)
     if args.do_test:
         infer_engine.run_test()
     elif args.do_eval:
